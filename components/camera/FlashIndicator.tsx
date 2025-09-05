@@ -1,9 +1,8 @@
 import React, { memo } from "react";
 import { View, Text, TouchableOpacity, StyleSheet, StyleProp, ViewStyle } from "react-native";
 import Rotating from "./Rotating";
-import useMotionDegrees from "../hooks/useMotionDegrees";
-
-export type TorchMode = "off" | "capture" | "on";
+import useMotionDegrees from "../../hooks/useMotionDegrees"; // fixed path
+import { TorchMode } from "./types"; // moved type to types.ts
 
 const BTN_SIDE = 56;
 
@@ -18,6 +17,7 @@ export default memo(function FlashIndicator({
 }) {
   const raw = useMotionDegrees();
   const degrees = raw === 180 || raw === -180 ? 0 : raw;
+
   const iconColor = torchMode === "off" ? "#7A7A7A" : "#FFC107";
   const sub = torchMode === "off" ? "OFF" : torchMode === "capture" ? "ON" : "A";
 

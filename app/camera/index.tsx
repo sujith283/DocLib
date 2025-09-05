@@ -1,12 +1,10 @@
-// index.tsx (CameraScreen) — portrait UI; only flash indicator rotates
+// CameraScreen — portrait UI; only flash indicator rotates
 import React, { useRef, useState, useMemo } from "react";
-import { View, TouchableOpacity, StyleSheet, StatusBar, Text } from "react-native";
+import { View, TouchableOpacity, StyleSheet, StatusBar } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-// If this file is two levels under project root, ../../ is correct.
-// Adjust the path depth if your screen lives elsewhere.
-import FlashIndicator, { TorchMode } from "../../components/FlashIndicator";
+import { FlashIndicator, TorchMode } from "../../components/camera"; // fixed to new folder
 
 const BOTTOM_MIN = 120;
 const BTN_SIDE = 56;
