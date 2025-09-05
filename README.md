@@ -65,7 +65,9 @@ DocLib is an open-source project and contributions are welcome! Whether you're i
 - Writing documentation
 - Reporting bugs
 
-Please feel free to open an issue or submit a pull request.
+**⚠️ Important**: All pull requests must be submitted to the `dev` branch only. Do not submit pull requests to `main`.
+
+Please feel free to open an issue or submit your pull request to the `dev` branch.
 
 ## Development Status
 
