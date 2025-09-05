@@ -43,7 +43,7 @@ You can start developing by editing the files inside the **app** directory. This
 - 📸 **Camera Integration** - Capture documents directly from your device
 - 🔍 **OCR Processing** - Convert images to searchable text
 - 🔎 **Full-text Search** - Find information across all your documents instantly  
-- 📱 **Cross-platform** - Works on iOS and Android
+- 📱 **Cross-platform** - Works on iOS, Android, and web
 - 💾 **Local Storage** - Keep your documents private and accessible offline
 - 🏷️ **Document Organization** - Tag and categorize your documents
 - 📤 **Export Options** - Share or backup your digitized documents
@@ -53,7 +53,7 @@ You can start developing by editing the files inside the **app** directory. This
 - **Framework**: Expo/React Native
 - **OCR Engine**: [To be implemented]
 - **Storage**: Local device storage
-- **Platform**: iOS, Android
+- **Platform**: iOS, Android, Web
 
 ## Contributing
 
@@ -95,6 +95,12 @@ To learn more about developing with Expo:
 - [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
 ## License
+
+This project is open source and available under the terms specified in the [LICENSE](LICENSE) file.
+
+## Contact
+
+For questions, suggestions, or collaboration opportunities, please open an issue on this repository.
 
 This project is open source. License details to be added.
 
