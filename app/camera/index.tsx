@@ -1,10 +1,15 @@
-import { useRef, useState, useMemo } from "react";
+// index.tsx (CameraScreen) — portrait UI; only flash indicator rotates
+import React, { useRef, useState, useMemo } from "react";
 import { View, TouchableOpacity, StyleSheet, StatusBar, Text } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+// If this file is two levels under project root, ../../ is correct.
+// Adjust the path depth if your screen lives elsewhere.
+import FlashIndicator, { TorchMode } from "../../components/FlashIndicator";
+
 const BOTTOM_MIN = 120;
-type TorchMode = "off" | "capture" | "on";
+const BTN_SIDE = 56;
 
 export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -15,8 +20,6 @@ export default function CameraScreen() {
 
   const enableTorch = useMemo(() => torchMode === "on", [torchMode]);
   const flash = useMemo(() => (torchMode === "capture" ? "on" : "off"), [torchMode]);
-  const iconColor = torchMode === "off" ? "#7A7A7A" : "#FFC107";
-  const sub = torchMode === "off" ? "OFF" : torchMode === "capture" ? "ON" : "A";
 
   if (!permission) return <View style={styles.root} />;
   if (!permission.granted) {
@@ -27,6 +30,7 @@ export default function CameraScreen() {
   return (
     <View style={styles.root}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
+
       <CameraView
         ref={camRef}
         style={StyleSheet.absoluteFillObject}
@@ -35,21 +39,25 @@ export default function CameraScreen() {
         enableTorch={enableTorch}
         flash={flash as any}
       />
-      <View style={[styles.bottomBar, { height: BOTTOM_MIN + insets.bottom, paddingBottom: insets.bottom }]}>
-        <TouchableOpacity
-          onPress={() => setTorchMode((m) => (m === "off" ? "capture" : m === "capture" ? "on" : "off"))}
-          style={styles.flashBtn}
-          activeOpacity={0.8}
-        >
-          <Text style={[styles.flashIcon, { color: iconColor }]}>⚡</Text>
-          <Text style={styles.flashSub}>{sub}</Text>
-        </TouchableOpacity>
+
+      <View
+        style={[
+          styles.bottomBar,
+          { height: BOTTOM_MIN + insets.bottom, paddingBottom: insets.bottom },
+        ]}
+      >
+        <FlashIndicator
+          torchMode={torchMode}
+          onPress={() =>
+            setTorchMode((m) => (m === "off" ? "capture" : m === "capture" ? "on" : "off"))
+          }
+        />
 
         <TouchableOpacity
           onPress={async () => {
             if (!ready || !camRef.current) return;
             const photo = await camRef.current.takePictureAsync({ quality: 1, skipProcessing: true });
-            console.log(photo?.uri);
+            console.log("[photo]", photo?.uri);
           }}
           style={styles.shutterOuter}
           activeOpacity={0.9}
@@ -63,10 +71,9 @@ export default function CameraScreen() {
   );
 }
 
-const BTN_SIDE = 56;
-
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "black" },
+
   bottomBar: {
     position: "absolute",
     left: 0,
@@ -76,32 +83,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
-    gap: 28
+    gap: 70,
   },
-  flashBtn: {
-    width: BTN_SIDE,
-    height: BTN_SIDE,
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  flashIcon: {
-    fontSize: 26,
-    lineHeight: 26,
-    marginLeft: -40
-  },
-  flashSub: {
-    position: "absolute",
-    bottom: 6,
-    right: 30,
-    fontSize: 10,
-    fontWeight: "700",
-    color: "white",
-    letterSpacing: 0.4
-  },
-  rightSpacer: {
-    width: BTN_SIDE,
-    height: BTN_SIDE
-  },
+
+  rightSpacer: { width: BTN_SIDE, height: BTN_SIDE },
+
   shutterOuter: {
     width: 76,
     height: 76,
@@ -109,12 +95,13 @@ const styles = StyleSheet.create({
     borderWidth: 4,
     borderColor: "white",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
+
   shutterInner: {
     width: 60,
     height: 60,
     borderRadius: 999,
-    backgroundColor: "red"
-  }
+    backgroundColor: "red",
+  },
 });
