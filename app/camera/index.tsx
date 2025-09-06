@@ -1,13 +1,13 @@
-// CameraScreen — portrait UI; only flash indicator rotates
+// CameraScreen — portrait UI; flash indicator rotates with device
 import React, { useRef, useState, useMemo } from "react";
-import { View, TouchableOpacity, StyleSheet, StatusBar } from "react-native";
+import { View, StyleSheet, StatusBar } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-import { FlashIndicator, TorchMode } from "../../components/camera"; // fixed to new folder
+// Use the barrel to import all camera UI pieces
+import { BottomBar, TorchMode } from "../../components/camera";
 
 const BOTTOM_MIN = 120;
-const BTN_SIDE = 56;
 
 export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -16,7 +16,9 @@ export default function CameraScreen() {
   const camRef = useRef<CameraView>(null);
   const insets = useSafeAreaInsets();
 
+  // live torch (continuous): true only when torchMode === 'on'
   const enableTorch = useMemo(() => torchMode === "on", [torchMode]);
+  // capture flash (one-shot): "on" only when torchMode === 'capture'
   const flash = useMemo(() => (torchMode === "capture" ? "on" : "off"), [torchMode]);
 
   if (!permission) return <View style={styles.root} />;
@@ -40,30 +42,27 @@ export default function CameraScreen() {
 
       <View
         style={[
-          styles.bottomBar,
+          styles.bottomBarWrap,
           { height: BOTTOM_MIN + insets.bottom, paddingBottom: insets.bottom },
         ]}
       >
-        <FlashIndicator
+        <BottomBar
           torchMode={torchMode}
-          onPress={() =>
+          onToggleTorch={() =>
             setTorchMode((m) => (m === "off" ? "capture" : m === "capture" ? "on" : "off"))
           }
-        />
-
-        <TouchableOpacity
-          onPress={async () => {
+          onShutter={async () => {
             if (!ready || !camRef.current) return;
-            const photo = await camRef.current.takePictureAsync({ quality: 1, skipProcessing: true });
+            const photo = await camRef.current.takePictureAsync({
+              quality: 1,
+              skipProcessing: true,
+            });
             console.log("[photo]", photo?.uri);
           }}
-          style={styles.shutterOuter}
-          activeOpacity={0.9}
-        >
-          <View style={styles.shutterInner} />
-        </TouchableOpacity>
-
-        <View style={styles.rightSpacer} />
+          // Optional: pass a right-slot (e.g., gallery button) later
+          rightSlot={null}
+          gap={70}
+        />
       </View>
     </View>
   );
@@ -71,8 +70,7 @@ export default function CameraScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "black" },
-
-  bottomBar: {
+  bottomBarWrap: {
     position: "absolute",
     left: 0,
     right: 0,
@@ -80,26 +78,5 @@ const styles = StyleSheet.create({
     backgroundColor: "black",
     alignItems: "center",
     justifyContent: "center",
-    flexDirection: "row",
-    gap: 70,
-  },
-
-  rightSpacer: { width: BTN_SIDE, height: BTN_SIDE },
-
-  shutterOuter: {
-    width: 76,
-    height: 76,
-    borderRadius: 999,
-    borderWidth: 4,
-    borderColor: "white",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-
-  shutterInner: {
-    width: 60,
-    height: 60,
-    borderRadius: 999,
-    backgroundColor: "red",
   },
 });
