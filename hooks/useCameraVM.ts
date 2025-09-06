@@ -3,6 +3,7 @@ import { CameraView } from "expo-camera";
 import { router } from "expo-router";
 import type { CaptureMode } from "../components/camera/ModeToggle";
 import type { TorchMode } from "../components/camera";
+import { setLatestCapture } from "../state/capture";
 
 export function useCameraVM() {
   const camRef = useRef<CameraView>(null);
@@ -20,15 +21,20 @@ export function useCameraVM() {
   const onCapture = useCallback(async () => {
     if (!ready || !camRef.current) return;
     const photo = await camRef.current.takePictureAsync({ quality: 1, skipProcessing: true });
+
     const uri = photo?.uri ?? "";
     console.log("[capture]", { mode, uri });
 
-    // Route selection by mode
-    router.push({
-    pathname: mode === "img" ? "/camera/confirm-image" : "/camera/confirm-pdf",
-    params: { uri: encodeURIComponent(uri) }, // ✅ encode
-    });
-  }, [mode, ready]);
+    // ✅ Save in in-mem cache
+    setLatestCapture(uri);
+
+    // ✅ Route WITHOUT params (no URL issues)
+    if (mode === "img") {
+        router.push("/camera/confirm-image");
+    } else {
+        router.push("/camera/confirm-pdf");
+    }
+    }, [mode, ready]);
 
   return {
     camRef,

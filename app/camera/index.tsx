@@ -2,7 +2,7 @@ import React from "react";
 import { View, StyleSheet, StatusBar } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
+import { useIsFocused } from "@react-navigation/native";
 import { BottomBar, Recent, TorchMode } from "../../components/camera";
 import ModeToggle, { CaptureMode } from "../../components/camera/ModeToggle";
 import { useCameraVM } from "../../hooks/useCameraVM";
@@ -25,6 +25,8 @@ export default function CameraScreen() {
     onCapture,
   } = useCameraVM();
 
+  const isFocused = useIsFocused();
+
   if (!permission) return <View style={styles.root} />;
   if (!permission.granted) {
     requestPermission();
@@ -35,6 +37,7 @@ export default function CameraScreen() {
     <View style={styles.root}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
+      {isFocused && (
       <CameraView
         ref={camRef}
         style={StyleSheet.absoluteFillObject}
@@ -43,6 +46,7 @@ export default function CameraScreen() {
         enableTorch={enableTorch}
         flash={flash as any}
       />
+      )}
 
       {/* Bottom stack: toggle above the bar */}
       <View
