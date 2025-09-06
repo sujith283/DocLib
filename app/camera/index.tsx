@@ -1,25 +1,29 @@
-// CameraScreen — portrait UI; flash indicator rotates with device
-import React, { useRef, useState, useMemo } from "react";
+import React from "react";
 import { View, StyleSheet, StatusBar } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-// Use the barrel to import all camera UI pieces
 import { BottomBar, Recent, TorchMode } from "../../components/camera";
+import ModeToggle, { CaptureMode } from "../../components/camera/ModeToggle";
+import { useCameraVM } from "../../hooks/useCameraVM";
 
-const BOTTOM_MIN = 120;
+const BOTTOM_MIN = 85; // a bit higher to fit the toggle comfortably
 
 export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
-  const [ready, setReady] = useState(false);
-  const [torchMode, setTorchMode] = useState<TorchMode>("off");
-  const camRef = useRef<CameraView>(null);
   const insets = useSafeAreaInsets();
-
-  // live torch (continuous): true only when torchMode === 'on'
-  const enableTorch = useMemo(() => torchMode === "on", [torchMode]);
-  // capture flash (one-shot): "on" only when torchMode === 'capture'
-  const flash = useMemo(() => (torchMode === "capture" ? "on" : "off"), [torchMode]);
+  const {
+    camRef,
+    ready,
+    setReady,
+    torchMode,
+    toggleTorch,
+    enableTorch,
+    flash,
+    mode,
+    setMode,
+    onCapture,
+  } = useCameraVM();
 
   if (!permission) return <View style={styles.root} />;
   if (!permission.granted) {
@@ -40,25 +44,21 @@ export default function CameraScreen() {
         flash={flash as any}
       />
 
+      {/* Bottom stack: toggle above the bar */}
       <View
         style={[
-          styles.bottomBarWrap,
+          styles.bottomStack,
           { height: BOTTOM_MIN + insets.bottom, paddingBottom: insets.bottom },
         ]}
       >
+        <View style={styles.toggleWrap}>
+          <ModeToggle value={mode} onChange={setMode} scale={0.9} />
+        </View>
+
         <BottomBar
-          torchMode={torchMode}
-          onToggleTorch={() =>
-            setTorchMode((m) => (m === "off" ? "capture" : m === "capture" ? "on" : "off"))
-          }
-          onShutter={async () => {
-            if (!ready || !camRef.current) return;
-            const photo = await camRef.current.takePictureAsync({
-              quality: 1,
-              skipProcessing: true,
-            });
-            console.log("[photo]", photo?.uri);
-          }}
+          torchMode={torchMode as TorchMode}
+          onToggleTorch={toggleTorch}
+          onShutter={onCapture}
           rightSlot={
             // No uri yet → shows the rounded square placeholder, rotates with device
             <Recent /* uri={latestUri} onPress={() => { navigate later }} */ />
@@ -72,13 +72,16 @@ export default function CameraScreen() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "black" },
-  bottomBarWrap: {
+  bottomStack: {
     position: "absolute",
     left: 0,
     right: 0,
     bottom: 0,
     backgroundColor: "black",
     alignItems: "center",
-    justifyContent: "center",
+    justifyContent: "flex-end",
+  },
+  toggleWrap: {
+    marginBottom: 14,
   },
 });
