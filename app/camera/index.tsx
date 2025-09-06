@@ -5,7 +5,7 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Use the barrel to import all camera UI pieces
-import { BottomBar, TorchMode } from "../../components/camera";
+import { BottomBar, Recent, TorchMode } from "../../components/camera";
 
 const BOTTOM_MIN = 120;
 
@@ -59,8 +59,10 @@ export default function CameraScreen() {
             });
             console.log("[photo]", photo?.uri);
           }}
-          // Optional: pass a right-slot (e.g., gallery button) later
-          rightSlot={null}
+          rightSlot={
+            // No uri yet → shows the rounded square placeholder, rotates with device
+            <Recent /* uri={latestUri} onPress={() => { navigate later }} */ />
+          }
           gap={70}
         />
       </View>
