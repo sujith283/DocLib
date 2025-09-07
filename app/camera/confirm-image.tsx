@@ -1,25 +1,30 @@
 import React, { useMemo } from "react";
-import { Image, View, StyleSheet, StatusBar } from "react-native";
+import { View, StyleSheet, StatusBar } from "react-native";
+import { Image } from "expo-image";
 import { getLatestCapture } from "../../state/capture";
+import { useIsFocused } from "@react-navigation/native";
 
 function normalizeUri(u?: string) {
   if (!u) return undefined;
-  // Ensure Android-friendly file:// prefix if needed
-  if (u.startsWith("/")) return "file://" + u;
-  return u;
+  return u.startsWith("/") ? "file://" + u : u; // Android safety
 }
 
-export default function ConfirmScreen() {
+export default function ConfirmImage() {
+  const isFocused = useIsFocused();
   const raw = getLatestCapture();
   const imageUri = useMemo(() => normalizeUri(raw), [raw]);
-
-  console.log("[confirm] uri", imageUri);
 
   return (
     <View style={styles.root}>
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
-      {imageUri ? (
-        <Image source={{ uri: imageUri }} style={styles.media} resizeMode="contain" />
+      {isFocused && imageUri ? (
+        <Image
+          source={{ uri: imageUri }}
+          style={styles.media}
+          contentFit="contain"
+          recyclingKey={imageUri}
+          // cachePolicy="none" // Uncomment if supported by your SDK
+        />
       ) : (
         <View style={styles.placeholder} />
       )}

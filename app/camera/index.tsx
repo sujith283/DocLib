@@ -1,17 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { View, StyleSheet, StatusBar } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useIsFocused } from "@react-navigation/native";
+
 import { BottomBar, Recent, TorchMode } from "../../components/camera";
-import ModeToggle, { CaptureMode } from "../../components/camera/ModeToggle";
+import ModeToggle from "../../components/camera/ModeToggle";
 import { useCameraVM } from "../../hooks/useCameraVM";
 
-const BOTTOM_MIN = 85; // a bit higher to fit the toggle comfortably
+const BOTTOM_MIN = 85; // your preferred height
 
 export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
   const insets = useSafeAreaInsets();
+
   const {
     camRef,
     ready,
@@ -23,9 +25,22 @@ export default function CameraScreen() {
     mode,
     setMode,
     onCapture,
+    resetNavigating, 
   } = useCameraVM();
 
   const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (!isFocused) {
+      setReady(false);
+      // @\ts-expect-error (API varies by SDK)
+      camRef.current?.pausePreview?.();
+      resetNavigating(); // ensure shutter re-enables on return
+    } else {
+      // @\ts-expect-error (API varies by SDK)
+      camRef.current?.resumePreview?.();
+    }
+  }, [isFocused, setReady, camRef, resetNavigating]);
 
   if (!permission) return <View style={styles.root} />;
   if (!permission.granted) {
@@ -38,17 +53,17 @@ export default function CameraScreen() {
       <StatusBar translucent backgroundColor="transparent" barStyle="light-content" />
 
       {isFocused && (
-      <CameraView
-        ref={camRef}
-        style={StyleSheet.absoluteFillObject}
-        onCameraReady={() => setReady(true)}
-        facing="back"
-        enableTorch={enableTorch}
-        flash={flash as any}
-      />
+        <CameraView
+          ref={camRef}
+          style={StyleSheet.absoluteFillObject}
+          onCameraReady={() => setReady(true)}
+          facing="back"
+          enableTorch={enableTorch}
+          flash={flash as any}
+        />
       )}
 
-      {/* Bottom stack: toggle above the bar */}
+      {/* Toggle above BottomBar */}
       <View
         style={[
           styles.bottomStack,
@@ -63,10 +78,7 @@ export default function CameraScreen() {
           torchMode={torchMode as TorchMode}
           onToggleTorch={toggleTorch}
           onShutter={onCapture}
-          rightSlot={
-            // No uri yet → shows the rounded square placeholder, rotates with device
-            <Recent /* uri={latestUri} onPress={() => { navigate later }} */ />
-          }
+          rightSlot={<Recent /* uri={latestThumb} onPress={() => {/* navigate later }} */ />}
           gap={70}
         />
       </View>
