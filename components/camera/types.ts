@@ -1,2 +1,2 @@
 // Torch flash modes
-export type TorchMode = "off" | "capture" | "on";
+export type TorchMode = "off" | "on";

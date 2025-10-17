@@ -4,7 +4,7 @@ import { router } from "expo-router";
 import { setLatestCapture } from "../state/capture";
 
 // If you already export these from your components barrel, feel free to import those types instead.
-type TorchMode = "off" | "capture" | "on";
+type TorchMode = "off" | "on";
 type CaptureMode = "img" | "pdf";
 
 export function useCameraVM() {
@@ -18,14 +18,10 @@ export function useCameraVM() {
   // Map torchMode to CameraView props
   const enableTorch = useMemo(() => torchMode === "on", [torchMode]);
 
-  const flash = useMemo(() => {
-    if (torchMode === "capture") return "on"; // one-shot flash
-    return "off";                             // default off, torch handled separately
-  }, [torchMode]);
-
+  const flash = useMemo(() => "off", []); // <-- always off now
 
   const toggleTorch = useCallback(() => {
-    setTorchMode((m) => (m === "off" ? "capture" : m === "capture" ? "on" : "off"));
+    setTorchMode((m) => (m === "off" ? "on" : "off"));
   }, []);
 
   const resetNavigating = useCallback(() => setIsNavigating(false), []);

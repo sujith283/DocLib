@@ -18,8 +18,9 @@ export default memo(function FlashIndicator({
   const raw = useMotionDegrees();
   const degrees = raw === 180 || raw === -180 ? 0 : raw;
 
-  const iconColor = torchMode === "off" ? "#7A7A7A" : "#FFC107";
-  const sub = torchMode === "off" ? "OFF" : torchMode === "capture" ? "ON" : "A";
+  const isOn = torchMode === "on";
+  const iconColor = torchMode === "on" ? "#FFC107" : "#7A7A7A";
+  const sub = isOn ? "ON" : "OFF";
 
   return (
     <TouchableOpacity onPress={onPress} style={[styles.btn, style]} activeOpacity={0.8}>
